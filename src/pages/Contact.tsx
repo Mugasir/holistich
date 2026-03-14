@@ -4,25 +4,32 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useToast } from "@/hooks/use-toast";
+import { supabase } from "@/integrations/supabase/client";
 
 const Contact = () => {
   const { toast } = useToast();
   const [form, setForm] = useState({ name: "", email: "", message: "" });
   const [loading, setLoading] = useState(false);
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!form.name.trim() || !form.email.trim() || !form.message.trim()) {
       toast({ title: "Please fill in all fields", variant: "destructive" });
       return;
     }
     setLoading(true);
-    // Simulate sending
-    setTimeout(() => {
+    const { error } = await supabase.from("contact_messages").insert({
+      name: form.name.trim(),
+      email: form.email.trim(),
+      message: form.message.trim(),
+    });
+    setLoading(false);
+    if (error) {
+      toast({ title: "Failed to send message", description: error.message, variant: "destructive" });
+    } else {
       toast({ title: "Message sent!", description: "We'll get back to you soon." });
       setForm({ name: "", email: "", message: "" });
-      setLoading(false);
-    }, 1000);
+    }
   };
 
   return (
@@ -90,35 +97,15 @@ const Contact = () => {
             <form onSubmit={handleSubmit} className="space-y-5">
               <div>
                 <label htmlFor="name" className="block text-sm font-medium mb-1.5">Full Name</label>
-                <Input
-                  id="name"
-                  value={form.name}
-                  onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))}
-                  placeholder="Your name"
-                  maxLength={100}
-                />
+                <Input id="name" value={form.name} onChange={(e) => setForm((f) => ({ ...f, name: e.target.value }))} placeholder="Your name" maxLength={100} />
               </div>
               <div>
                 <label htmlFor="email" className="block text-sm font-medium mb-1.5">Email Address</label>
-                <Input
-                  id="email"
-                  type="email"
-                  value={form.email}
-                  onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))}
-                  placeholder="your@email.com"
-                  maxLength={255}
-                />
+                <Input id="email" type="email" value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} placeholder="your@email.com" maxLength={255} />
               </div>
               <div>
                 <label htmlFor="message" className="block text-sm font-medium mb-1.5">Message</label>
-                <Textarea
-                  id="message"
-                  value={form.message}
-                  onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))}
-                  placeholder="How can we help you?"
-                  rows={5}
-                  maxLength={1000}
-                />
+                <Textarea id="message" value={form.message} onChange={(e) => setForm((f) => ({ ...f, message: e.target.value }))} placeholder="How can we help you?" rows={5} maxLength={1000} />
               </div>
               <Button type="submit" className="w-full" size="lg" disabled={loading}>
                 <Send className="h-4 w-4 mr-2" />

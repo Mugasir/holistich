@@ -1,7 +1,8 @@
 import { useState } from "react";
 import { Link, useLocation } from "react-router-dom";
-import { ShoppingCart, Menu, X } from "lucide-react";
+import { ShoppingCart, Menu, X, User, Shield } from "lucide-react";
 import { useCart } from "@/contexts/CartContext";
+import { useAuth } from "@/contexts/AuthContext";
 import logo from "@/assets/logo.png";
 
 const navLinks = [
@@ -16,6 +17,7 @@ const navLinks = [
 const Navbar = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const { totalItems, setIsCartOpen } = useCart();
+  const { user, isAdmin } = useAuth();
   const location = useLocation();
 
   return (
@@ -40,7 +42,21 @@ const Navbar = () => {
           ))}
         </div>
 
-        <div className="flex items-center gap-4">
+        <div className="flex items-center gap-3">
+          {isAdmin && (
+            <Link to="/admin" className="p-2 rounded-full hover:bg-muted transition-colors" title="Admin">
+              <Shield className="h-5 w-5 text-primary" />
+            </Link>
+          )}
+          {user ? (
+            <Link to="/dashboard" className="p-2 rounded-full hover:bg-muted transition-colors" title="Dashboard">
+              <User className="h-5 w-5 text-foreground" />
+            </Link>
+          ) : (
+            <Link to="/login" className="hidden sm:inline-flex text-sm font-medium text-primary hover:underline">
+              Sign In
+            </Link>
+          )}
           <button
             onClick={() => setIsCartOpen(true)}
             className="relative p-2 rounded-full hover:bg-muted transition-colors"
@@ -80,6 +96,11 @@ const Navbar = () => {
                 {link.label}
               </Link>
             ))}
+            {!user && (
+              <Link to="/login" onClick={() => setMobileOpen(false)} className="py-2 text-sm font-medium text-primary">
+                Sign In
+              </Link>
+            )}
           </div>
         </div>
       )}

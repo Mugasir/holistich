@@ -65,7 +65,7 @@ const CartDrawer = () => {
                 <span>Total</span>
                 <span>UGX {totalPrice.toLocaleString()}</span>
               </div>
-              <Button className="w-full" size="lg">
+              <Button className="w-full" size="lg" onClick={() => { setIsCartOpen(false); navigate("/checkout"); }}>
                 Proceed to Checkout
               </Button>
             </div>
