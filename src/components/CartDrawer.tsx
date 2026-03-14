@@ -6,6 +6,7 @@ import { Button } from "@/components/ui/button";
 
 const CartDrawer = () => {
   const { items, removeItem, updateQuantity, totalPrice, isCartOpen, setIsCartOpen } = useCart();
+  const navigate = useNavigate();
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
