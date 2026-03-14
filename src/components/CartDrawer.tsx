@@ -1,10 +1,12 @@
 import { X, Plus, Minus, ShoppingBag } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { useCart } from "@/contexts/CartContext";
 import { Sheet, SheetContent, SheetHeader, SheetTitle } from "@/components/ui/sheet";
 import { Button } from "@/components/ui/button";
 
 const CartDrawer = () => {
   const { items, removeItem, updateQuantity, totalPrice, isCartOpen, setIsCartOpen } = useCart();
+  const navigate = useNavigate();
 
   return (
     <Sheet open={isCartOpen} onOpenChange={setIsCartOpen}>
@@ -63,7 +65,7 @@ const CartDrawer = () => {
                 <span>Total</span>
                 <span>UGX {totalPrice.toLocaleString()}</span>
               </div>
-              <Button className="w-full" size="lg">
+              <Button className="w-full" size="lg" onClick={() => { setIsCartOpen(false); navigate("/checkout"); }}>
                 Proceed to Checkout
               </Button>
             </div>
