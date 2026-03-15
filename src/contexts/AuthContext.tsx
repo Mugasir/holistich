@@ -45,13 +45,23 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
+    let mounted = true;
+
+    // Set up listener FIRST
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, session) => {
+      if (!mounted) return;
+      // Ignore TOKEN_REFRESHED to avoid re-render loops
+      if (event === 'TOKEN_REFRESHED') return;
+      
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
+        // Use setTimeout to avoid Supabase deadlock
         setTimeout(() => {
-          checkAdmin(session.user.id);
-          fetchProfile(session.user.id);
+          if (mounted) {
+            checkAdmin(session.user.id);
+            fetchProfile(session.user.id);
+          }
         }, 0);
       } else {
         setIsAdmin(false);
@@ -60,7 +70,9 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
+    // THEN get initial session
     supabase.auth.getSession().then(({ data: { session } }) => {
+      if (!mounted) return;
       setSession(session);
       setUser(session?.user ?? null);
       if (session?.user) {
@@ -70,7 +82,10 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
       setLoading(false);
     });
 
-    return () => subscription.unsubscribe();
+    return () => {
+      mounted = false;
+      subscription.unsubscribe();
+    };
   }, []);
 
   const signOut = async () => {
