@@ -114,7 +114,7 @@ Deno.serve(async (req) => {
       // Verify user
       const supabaseAnon = createClient(
         Deno.env.get("SUPABASE_URL")!,
-        Deno.env.get("SUPABASE_PUBLISHABLE_KEY")!
+        Deno.env.get("SUPABASE_ANON_KEY")!
       );
       const { data: { user }, error: authError } = await supabaseAnon.auth.getUser(
         authHeader.replace("Bearer ", "")
