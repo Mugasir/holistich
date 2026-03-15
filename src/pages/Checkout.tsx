@@ -50,48 +50,89 @@ const Checkout = () => {
     }
     setLoading(true);
 
-    // Create order
-    const { data: order, error: orderError } = await supabase
-      .from("orders")
-      .insert({
-        user_id: user.id,
-        total: totalPrice,
-        delivery_address: form.address.trim(),
-        delivery_city: form.city.trim(),
-        delivery_phone: form.phone.trim(),
-        payment_method: paymentMethod,
-        status: "pending",
-      })
-      .select()
-      .single();
+    try {
+      // Create order
+      const { data: order, error: orderError } = await supabase
+        .from("orders")
+        .insert({
+          user_id: user.id,
+          total: totalPrice,
+          delivery_address: form.address.trim(),
+          delivery_city: form.city.trim(),
+          delivery_phone: form.phone.trim(),
+          payment_method: paymentMethod,
+          status: "pending",
+        })
+        .select()
+        .single();
 
-    if (orderError || !order) {
-      toast({ title: "Failed to create order", description: orderError?.message, variant: "destructive" });
+      if (orderError || !order) {
+        toast({ title: "Failed to create order", description: orderError?.message, variant: "destructive" });
+        setLoading(false);
+        return;
+      }
+
+      // Create order items
+      const { data: products } = await supabase.from("products").select("id, size, price");
+      
+      const orderItems = items.map((item) => {
+        const matchedProduct = products?.find((p) => p.size === item.size && p.price === item.price);
+        return {
+          order_id: order.id,
+          product_id: matchedProduct?.id || item.id,
+          quantity: item.quantity,
+          price: item.price,
+          size: item.size,
+        };
+      });
+
+      await supabase.from("order_items").insert(orderItems);
+
+      // Initiate Pesapal payment
+      const session = await supabase.auth.getSession();
+      const token = session.data.session?.access_token;
+
+      const callbackUrl = `${window.location.origin}/dashboard?order=${order.id}`;
+      const projectId = import.meta.env.VITE_SUPABASE_PROJECT_ID;
+
+      const pesapalRes = await fetch(
+        `https://${projectId}.supabase.co/functions/v1/pesapal-payment/submit`,
+        {
+          method: "POST",
+          headers: {
+            "Content-Type": "application/json",
+            Authorization: `Bearer ${token}`,
+          },
+          body: JSON.stringify({ orderId: order.id, callbackUrl }),
+        }
+      );
+
+      const pesapalData = await pesapalRes.json();
+
+      if (!pesapalRes.ok || !pesapalData.redirect_url) {
+        // Order created but payment init failed - redirect to dashboard
+        toast({
+          title: "Order created",
+          description: "Payment could not be initiated. You can retry from your dashboard.",
+          variant: "destructive",
+        });
+        clearCart();
+        setIsCartOpen(false);
+        navigate("/dashboard");
+        return;
+      }
+
+      // Success - clear cart and redirect to Pesapal payment page
+      clearCart();
+      setIsCartOpen(false);
+      toast({ title: "Redirecting to payment...", description: `Order: ${order.id.slice(0, 8).toUpperCase()}` });
+      window.location.href = pesapalData.redirect_url;
+    } catch (err) {
+      console.error("Checkout error:", err);
+      toast({ title: "Something went wrong", variant: "destructive" });
+    } finally {
       setLoading(false);
-      return;
     }
-
-    // Create order items - we need to find matching product IDs
-    const { data: products } = await supabase.from("products").select("id, size, price");
-    
-    const orderItems = items.map((item) => {
-      const matchedProduct = products?.find((p) => p.size === item.size && p.price === item.price);
-      return {
-        order_id: order.id,
-        product_id: matchedProduct?.id || item.id,
-        quantity: item.quantity,
-        price: item.price,
-        size: item.size,
-      };
-    });
-
-    await supabase.from("order_items").insert(orderItems);
-
-    setLoading(false);
-    clearCart();
-    setIsCartOpen(false);
-    toast({ title: "Order placed successfully!", description: `Order reference: ${order.id.slice(0, 8).toUpperCase()}` });
-    navigate("/dashboard");
   };
 
   const paymentOptions = [
