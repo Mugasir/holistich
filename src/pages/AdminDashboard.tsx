@@ -11,7 +11,8 @@ import AdminOrders from "@/components/admin/AdminOrders";
 import AdminProducts from "@/components/admin/AdminProducts";
 import AdminMessages from "@/components/admin/AdminMessages";
 import AdminUsers from "@/components/admin/AdminUsers";
-import { DollarSign, ShoppingCart, Package, Mail, UserPlus } from "lucide-react";
+import AdminClients from "@/components/admin/AdminClients";
+import { DollarSign, ShoppingCart, Package, Mail, UserPlus, Users } from "lucide-react";
 
 interface Order {
   id: string;
@@ -39,7 +40,7 @@ const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading, session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [tab, setTab] = useState<"overview" | "orders" | "products" | "messages" | "users">("overview");
+  const [tab, setTab] = useState<"overview" | "orders" | "products" | "messages" | "users" | "clients">("overview");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [messages, setMessages] = useState<ContactMsg[]>([]);
@@ -128,6 +129,7 @@ const AdminDashboard = () => {
     { key: "products" as const, label: "Products", icon: Package },
     { key: "messages" as const, label: `Messages${unreadMessages ? ` (${unreadMessages})` : ""}`, icon: Mail },
     { key: "users" as const, label: "Admin Users", icon: UserPlus },
+    { key: "clients" as const, label: "Clients", icon: Users },
   ];
 
   return (
@@ -144,7 +146,7 @@ const AdminDashboard = () => {
         </div>
 
         {tab === "overview" && (
-          <AdminOverview totalSales={totalSales} orderCount={orders.length} unreadMessages={unreadMessages} />
+          <AdminOverview totalSales={totalSales} orderCount={orders.length} unreadMessages={unreadMessages} orders={orders} />
         )}
         {tab === "orders" && (
           <AdminOrders orders={orders} dateFilter={dateFilter} setDateFilter={setDateFilter} updateOrderStatus={updateOrderStatus} />
@@ -157,6 +159,9 @@ const AdminDashboard = () => {
         )}
         {tab === "users" && (
           <AdminUsers session={session} />
+        )}
+        {tab === "clients" && (
+          <AdminClients />
         )}
       </div>
     </div>
