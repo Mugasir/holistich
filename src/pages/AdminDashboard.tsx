@@ -129,6 +129,7 @@ const AdminDashboard = () => {
     { key: "products" as const, label: "Products", icon: Package },
     { key: "messages" as const, label: `Messages${unreadMessages ? ` (${unreadMessages})` : ""}`, icon: Mail },
     { key: "users" as const, label: "Admin Users", icon: UserPlus },
+    { key: "clients" as const, label: "Clients", icon: Users },
   ];
 
   return (
