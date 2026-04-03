@@ -146,7 +146,7 @@ const AdminDashboard = () => {
         </div>
 
         {tab === "overview" && (
-          <AdminOverview totalSales={totalSales} orderCount={orders.length} unreadMessages={unreadMessages} />
+          <AdminOverview totalSales={totalSales} orderCount={orders.length} unreadMessages={unreadMessages} orders={orders} />
         )}
         {tab === "orders" && (
           <AdminOrders orders={orders} dateFilter={dateFilter} setDateFilter={setDateFilter} updateOrderStatus={updateOrderStatus} />
