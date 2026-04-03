@@ -40,7 +40,7 @@ const AdminDashboard = () => {
   const { user, isAdmin, loading: authLoading, session } = useAuth();
   const navigate = useNavigate();
   const { toast } = useToast();
-  const [tab, setTab] = useState<"overview" | "orders" | "products" | "messages" | "users">("overview");
+  const [tab, setTab] = useState<"overview" | "orders" | "products" | "messages" | "users" | "clients">("overview");
   const [orders, setOrders] = useState<Order[]>([]);
   const [products, setProducts] = useState<any[]>([]);
   const [messages, setMessages] = useState<ContactMsg[]>([]);
