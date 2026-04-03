@@ -162,7 +162,7 @@ const AdminDashboard = () => {
         )}
         {tab === "clients" && (
           <AdminClients />
-        )
+        )}
       </div>
     </div>
   );
