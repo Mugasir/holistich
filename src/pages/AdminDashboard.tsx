@@ -160,6 +160,10 @@ const AdminDashboard = () => {
         {tab === "users" && (
           <AdminUsers session={session} />
         )}
+        {tab === "clients" && (
+          <AdminClients />
+        )}
+        )}
       </div>
     </div>
   );
