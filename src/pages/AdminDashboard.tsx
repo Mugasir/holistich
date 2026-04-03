@@ -11,7 +11,8 @@ import AdminOrders from "@/components/admin/AdminOrders";
 import AdminProducts from "@/components/admin/AdminProducts";
 import AdminMessages from "@/components/admin/AdminMessages";
 import AdminUsers from "@/components/admin/AdminUsers";
-import { DollarSign, ShoppingCart, Package, Mail, UserPlus } from "lucide-react";
+import AdminClients from "@/components/admin/AdminClients";
+import { DollarSign, ShoppingCart, Package, Mail, UserPlus, Users } from "lucide-react";
 
 interface Order {
   id: string;
